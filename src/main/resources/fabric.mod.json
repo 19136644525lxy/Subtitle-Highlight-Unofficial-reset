@@ -18,7 +18,7 @@
 	"environment": "client",
 	"entrypoints": {
 		"client": [
-			"com.qituo.shur.Initializer.Client"
+			"com.qituo.shur.Initializer"
 		],
 		"modmenu": [
 			"com.qituo.shur.Configure.ScreenAPI"

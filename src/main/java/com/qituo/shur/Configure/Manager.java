@@ -49,4 +49,30 @@ public class Manager {
             }
         }
     }
+
+    public static void exportConfig(File exportFile) {
+        try (FileWriter writer = new FileWriter(exportFile, StandardCharsets.UTF_8, false)) {
+            writer.write(gson.toJson(settings));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static void importConfig(File importFile) {
+        if (!importFile.exists() || !importFile.isFile()) {
+            throw new IllegalArgumentException("Import file does not exist or is not a file");
+        }
+        try (FileReader reader = new FileReader(importFile, StandardCharsets.UTF_8)) {
+            char[] content = new char[(int) importFile.length()];
+            reader.read(content);
+            try {
+                settings = gson.fromJson(new String(content).trim(), Settings.class);
+                save();
+            } catch (JsonSyntaxException e) {
+                throw new IllegalArgumentException("Invalid configuration file format", e);
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }

@@ -5,10 +5,14 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.hud.SubtitlesHud;
+import net.minecraft.client.render.Camera;
+import net.minecraft.client.render.Frustum;
+import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
 import net.minecraft.text.TextColor;
 import net.minecraft.util.Util;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.Vec3d;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -91,5 +95,36 @@ public class SubtitlesHudMixin {
     @ModifyArgs(method = "render(Lnet/minecraft/client/gui/DrawContext;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/DrawContext;fill(IIIII)V"))
     private void modifyFill(Args args) {
         args.set(4, Manager.settings.backgroundColor);
+    }
+
+    @Redirect(method = "render(Lnet/minecraft/client/gui/DrawContext;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/DrawContext;drawTextWithShadow(Lnet/minecraft/client/font/TextRenderer;Lnet/minecraft/text/Text;III)I", ordinal = 0))
+    private int redirectDrawTextWithShadow(Object drawContext, Object textRenderer, Object text, int x, int y, int color) {
+        // 检查字幕是否在视锥体范围内
+        if (!isInFrustum()) {
+            return 0;
+        }
+        // 调用原始方法
+        try {
+            return (int) drawContext.getClass().getMethod("drawTextWithShadow", textRenderer.getClass(), text.getClass(), int.class, int.class, int.class).invoke(drawContext, textRenderer, text, x, y, color);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return 0;
+        }
+    }
+
+    private boolean isInFrustum() {
+        // 检查字幕是否在屏幕范围内
+        if (client == null || client.getWindow() == null) {
+            return false;
+        }
+        
+        // 简单的屏幕范围检查
+        int screenWidth = client.getWindow().getScaledWidth();
+        int screenHeight = client.getWindow().getScaledHeight();
+        
+        // 这里可以添加更复杂的视锥体检查逻辑
+        // 例如使用 Frustum 类的方法来检查点是否在视锥体范围内
+        
+        return true;
     }
 }

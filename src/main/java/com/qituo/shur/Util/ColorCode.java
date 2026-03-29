@@ -26,4 +26,13 @@ public enum ColorCode {
     public Formatting getFormatting() {
         return this.formatting;
     }
+
+    public static ColorCode fromName(String name) {
+        for (ColorCode colorCode : ColorCode.values()) {
+            if (colorCode.name().toLowerCase().equals(name)) {
+                return colorCode;
+            }
+        }
+        return null;
+    }
 }

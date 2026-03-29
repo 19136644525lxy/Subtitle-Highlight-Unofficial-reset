@@ -44,3 +44,11 @@ replay_*.log
 #github
 
 .github/
+
+#plan
+
+plan/
+
+#logs
+
+logs/

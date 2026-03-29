@@ -9,12 +9,14 @@ import me.shedaniel.clothconfig2.gui.entries.NestedListListEntry;
 import me.shedaniel.clothconfig2.impl.builders.SubCategoryBuilder;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.text.TextColor;
 import net.minecraft.util.Identifier;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -154,6 +156,40 @@ public class ScreenAPI implements ModMenuApi {
                     }).build()), true);
                 }));
                 builder.getOrCreateCategory(Text.translatable("shur.configure.custom")).setDescription(new MutableText[]{Text.translatable("shur.configure.custom.description")});
+                
+                // 添加配置导出和导入功能
+                builder.getOrCreateCategory(Text.translatable("shur.configure.share")).addEntry(builder.entryBuilder().startTextDescription(Text.translatable("shur.configure.share.description")).build()).addEntry(builder.entryBuilder().startBooleanToggle(Text.translatable("shur.configure.share.export"), false).setDefaultValue(false).setSaveConsumer((value) -> {
+                    if (value) {
+                        // 导出配置
+                        try {
+                            File exportFile = new File(FabricLoader.getInstance().getConfigDir().toFile(), "shur_export.json");
+                            Manager.exportConfig(exportFile);
+                            MinecraftClient.getInstance().player.sendMessage(Text.translatable("shur.configure.share.export.success", exportFile.getAbsolutePath()), false);
+                        } catch (Exception e) {
+                            MinecraftClient.getInstance().player.sendMessage(Text.translatable("shur.configure.share.export.error"), false);
+                            e.printStackTrace();
+                        }
+                    }
+                }).build()).addEntry(builder.entryBuilder().startBooleanToggle(Text.translatable("shur.configure.share.import"), false).setDefaultValue(false).setSaveConsumer((value) -> {
+                    if (value) {
+                        // 导入配置
+                        try {
+                            File importFile = new File(FabricLoader.getInstance().getConfigDir().toFile(), "shur_import.json");
+                            if (importFile.exists()) {
+                                Manager.importConfig(importFile);
+                                MinecraftClient.getInstance().player.sendMessage(Text.translatable("shur.configure.share.import.success"), false);
+                                // 重新打开配置界面以显示新配置
+                                MinecraftClient.getInstance().setScreen(getModConfigScreenFactory().create(parent));
+                            } else {
+                                MinecraftClient.getInstance().player.sendMessage(Text.translatable("shur.configure.share.import.error"), false);
+                            }
+                        } catch (Exception e) {
+                            MinecraftClient.getInstance().player.sendMessage(Text.translatable("shur.configure.share.import.error"), false);
+                            e.printStackTrace();
+                        }
+                    }
+                }).build());
+                
                 return builder.build();
             } catch (NullPointerException e) {
                 Manager.settings = new Settings();
