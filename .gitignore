@@ -52,3 +52,7 @@ plan/
 #logs
 
 logs/
+
+#other
+
+main.bat
