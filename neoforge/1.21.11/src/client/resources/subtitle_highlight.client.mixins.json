@@ -1,0 +1,12 @@
+{
+  "required": true,
+  "package": "yeah_zero.subtitle_highlight.Mixin",
+  "compatibilityLevel": "JAVA_21",
+  "client": [
+    "SubtitleEntryMixin",
+    "SubtitlesHudMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
